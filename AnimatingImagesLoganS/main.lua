@@ -31,7 +31,7 @@ squidward.y = squidward.y + scrollSpeed
 squidward.x = squidward.x +scrollSpeed
 
 
-squidward.alpha = squidward.alpha + 0.01
+squidward.alpha = squidward.alpha + 0.02
 end
 
 
@@ -43,7 +43,7 @@ local function MoveMario(event)
 mario.x = mario.x + scrollSpeed
 mario.y = mario.y + scrollSpeed
 
-mario.alpha = mario.alpha + 0.01
+mario.alpha = mario.alpha + 0.02
 end
 
 -- MoveShip will be called over and over again
