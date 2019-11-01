@@ -6,7 +6,6 @@
 --hide status bar
 display.setStatusBar (display.HiddenStatusBar)
 
-display.setDefault("background", 121/255, 199/255, 124/255)
 
 ----------------------------------------------------------------------------
 --LOCAL VARIABLES
@@ -139,6 +138,10 @@ local function NumericFieldListener(event)
 			correctSoundChannel = audio.play (correctSound)
 			timer.performWithDelay (2000, HideCorrect)
 			secondsLeft = totalSeconds + 2
+			if (points == 10) then
+				youWin.isVisible = true
+				youWinSoundChannel = audio.playSound (youWinSound)
+			end
 		else
 			lives = lives - 1
 			secondsLeft = totalSeconds + 2
@@ -161,6 +164,14 @@ local function NumericFieldListener(event)
 				numericField.isVisible = false
 				gameOverSoundChannel = audio.play (gameOverSound)
 				clockText.isVisible = false
+				heart1.isVisible = false
+			elseif (lives == 2) then
+				heart3.isVisible = false
+			elseif (lives == 1) then
+				heart2.isvisible = false
+			elseif (lives  == 0) then
+				heart4.isVisible = false
+
 			end
 		end
 	end
