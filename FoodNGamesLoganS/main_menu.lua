@@ -102,8 +102,8 @@ function scene:create( event )
             height = 100,
 
             -- Insert the images here
-            defaultFile = "Images/Start Button Unpressed.png",
-            overFile = "Images/Start Button Pressed.png",
+            defaultFile = "Images/PlayButtonUnpressedMelody.png",
+            overFile = "Images/PlayButtonpressedMelody.png",
 
             -- When the button is released, call the Level 1 screen transition function
             onRelease = Level1ScreenTransition          
@@ -122,8 +122,8 @@ function scene:create( event )
             height = 100,
 
             -- Insert the images here
-            defaultFile = "Images/Credits Button Unpressed.png",
-            overFile = "Images/Credits Button Pressed.png",
+            defaultFile = "Images/CreditsButtonUnpressedJosias.png",
+            overFile = "Images/CreditsButtonPressedJosias.png",
 
             -- When the button is released, call the Credits transition function
             onRelease = CreditsTransition
@@ -140,8 +140,8 @@ function scene:create( event )
             height = 100,
 
             -- Insert the images here
-            defaultFile = "Images/Instructions Button.png",
-            overFile = "Images/Instructions Button Pressed.png",
+            defaultFile = "Images/InstructionsButtonUnpressed.png",
+            overFile = "Images/InstructionsButtonPressedLogan.png",
 
             -- When the button is released, call the Credits transition function
             onRelease = InstructionsScreenTransition

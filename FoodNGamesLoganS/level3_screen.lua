@@ -2,24 +2,24 @@
 display.setStatusBar (display.HiddenStatusBar)
 
 --display the soccer field
-----------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
 --
 -- FoodNGames Level 3 - soccer
 -- Created by: Logan
 -- Date: Nov. 22nd, 2014
 -- Description: This is the level 3 screen of the game.
------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------
 
 
 -- Use Composer Library
 local composer = require( "composer" )
 
------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------
 
 -- Use Widget Library
 local widget = require( "widget" )
 
------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------
 
  --Naming Scene
 sceneName = "level3_screen"
@@ -27,9 +27,9 @@ sceneName = "level3_screen"
  --Creating Scene Object
 local scene = composer.newScene( sceneName )
 
------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------
 -- LOCAL VARIABLES
------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------
 
 -- The background image, soccer ball and player/character for this scene
 local bkg_image
@@ -37,28 +37,33 @@ local soccerBall
 local player
 
 --the text that displays the question
-local questionText 
+local questionText
+local points = 0
+local pointsText
+
 
 --the alternate numbers randomly generated
-local correctAnswer
+local correctAnswer = 0
 local alternateAnswer1
-local alternateAnswer2    
+local alternateAnswer2
+local correctText
+local incorrectText
 
 -- Variables containing the user answer and the actual answer
 local userAnswer
 
--- boolean variables telling me which answer box was touched
+-- boolean variables telling me which answer box wa touched
 local answerboxAlreadyTouched = false
 local alternateAnswerBox1AlreadyTouched = false
 local alternateAnswerBox2AlreadyTouched = false
 
---create textboxes holding answer and alternate answers 
+--create textboxes holding answer and alternate ansers 
 local answerbox
 local alternateAnswerBox1
 local alternateAnswerBox2
 
--- create variables that will hold the previous x- and y-positions so that 
--- each answer will return back to its previous position after it is moved
+-- create variables that will hold the previous x- nd y-positions so that 
+-- each answer will return back to its previous postion after it is moved
 local answerboxPreviousY
 local alternateAnswerBox1PreviousY
 local alternateAnswerBox2PreviousY
@@ -74,6 +79,11 @@ local userAnswerBoxPlaceholder
 local correctSound
 local booSound
 
+--scroll speed for the ball to Score
+local scrollXSpeed = 8
+local scrollYSpeed = -10
+
+
 -----------------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS
 -----------------------------------------------------------------------------------------
@@ -84,7 +94,7 @@ local function DisplayQuestion()
 
     --set random numbers
     randomNumber1 = math.random(1, 9)
-    randomNumber2 = math.random(0, 9)
+    randomNumber2 = math.random(1, 9)
 
     --calculate answer
     correctAnswer = randomNumber1 * randomNumber2
@@ -182,13 +192,30 @@ local function PositionAnswers()
     end
 end
 
--- Transitioning Function to YouWin screen
-local function YouWinTransitionLevel1( )
-    composer.gotoScene("you_win", {effect = "fade", time = 500})
+--hide the correct text
+local function HideCorrectText()
+    correctText.isVisible = false
+end
+
+--hide the incorrect answer text
+local function HideIncorrectText()
+    incorrectText.isVisible = false
+end
+
+--function to move the soccer ball once they get the answer right
+local function MoveSoccerBall()
+    if (soccerBall.y < 100) then
+        Runtime:removeEventListener("enterFrame", MoveSoccerBall)
+    else
+        soccerBall.x = soccerBall.x + scrollXSpeed
+        soccerBall.y = soccerBall.y + scrollYSpeed
+    end
 end
 
 -- Function to Restart Level 1
 local function RestartLevel1()
+    soccerBall.x = display.contentWidth*0.385
+    soccerBall.y = display.contentHeight * 12/20
     DisplayQuestion()
     DetermineAlternateAnswers()
     PositionAnswers()    
@@ -196,8 +223,30 @@ end
 
 -- Function to Check User Input
 local function CheckUserAnswerInput()
-          
-    timer.performWithDelay(1600, RestartLevel1) 
+    print("Executing CheckUserAnswerInput")
+    
+    if (userAnswer == correctAnswer) then
+        points = points + 1
+        pointsText.text = "Points: " .. points
+        correctText.isVisible = true
+        timer.performWithDelay(1600, HideCorrectText)
+
+        Runtime:addEventListener("enterFrame", MoveSoccerBall) 
+
+        
+    else 
+        print("correctAnswer = ".. correctAnswer)
+        incorrectText.isVisible = true
+        incorrectText.text = "Incorrect! The correct answer is " .. correctAnswer .. "!"
+        timer.performWithDelay(1600, HideIncorrectText)
+    end
+
+    if (points == 5) then
+        composer.gotoScene("you_win", {effect = "fade", time = 500})
+    else
+       timer.performWithDelay(1800, RestartLevel1)  
+    end   
+    
 end
 
 local function TouchListenerAnswerbox(touch)
@@ -223,7 +272,7 @@ local function TouchListenerAnswerbox(touch)
 
               -- if the number is dragged into the userAnswerBox, place it in the center of it
             if (((userAnswerBoxPlaceholder.x - userAnswerBoxPlaceholder.width/2) < answerbox.x ) and
-                ((userAnswerBoxPlaceholder.x + userAnswerBoxPlaceholder.width/2) > answerbox.x ) and 
+                ((userAnswerBoxPlaceholder.x + userAnswerBoxPlaceholder.width/2) > answerbox.x ) and
                 ((userAnswerBoxPlaceholder.y - userAnswerBoxPlaceholder.height/2) < answerbox.y ) and 
                 ((userAnswerBoxPlaceholder.y + userAnswerBoxPlaceholder.height/2) > answerbox.y ) ) then
 
@@ -358,7 +407,7 @@ function scene:create( event )
     ----------------------------------------------------------------------------------
 
     -- Insert the background image
-    bkg_image = display.newImageRect("Images/Level3ScreenLogan@2x.png", 1024, 768)
+    bkg_image = display.newImageRect("Images/Level3ScreenLogan.png", 1024, 768)
     bkg_image.x = display.contentCenterX
     bkg_image.y = display.contentCenterY
     bkg_image.width = display.contentWidth
@@ -400,6 +449,25 @@ function scene:create( event )
     userAnswerBoxPlaceholder.x = display.contentWidth * 0.6
     userAnswerBoxPlaceholder.y = display.contentHeight * 0.9
 
+    --the amounts of points shown on the screen
+    pointsText = display.newText("Points: " .. points .. "", 0, 0, nil, 70)
+    pointsText.x = display.contentWidth/6
+    pointsText.y = display.contentHeight/22
+    pointsText:setTextColor(1/255, 1/255, 1/255)
+
+    --correct answer text
+    correctText = display.newText("Correct! Great Job!", 0, 0, nil, 50)
+    correctText.x = display.contentWidth/2
+    correctText.y = display.contentHeight/3
+    correctText:setTextColor(1/255, 1/255, 1/255)
+    correctText.isVisible = false
+
+    incorrectText = display.newText("Incorrect! The correct answer was " .. correctAnswer .. "!", 0, 0, nil, 50)
+    incorrectText.x = display.contentWidth/2
+    incorrectText.y = display.contentHeight/3
+    incorrectText:setTextColor(1/255, 1/255, 1/255)
+    incorrectText.isVisible = false
+
     ----------------------------------------------------------------------------------
     --adding objects to the scene group
     ----------------------------------------------------------------------------------
@@ -412,6 +480,7 @@ function scene:create( event )
     sceneGroup:insert( alternateAnswerBox2 )
     sceneGroup:insert( soccerBall )
     sceneGroup:insert( player )
+    sceneGroup:insert( pointsText )
 
 end --function scene:create( event )
 
