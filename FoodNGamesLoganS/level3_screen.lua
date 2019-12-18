@@ -31,8 +31,7 @@ local scene = composer.newScene( sceneName )
 -- LOCAL VARIABLES
 ----------------------------------------------------------------------------------------
 
--- The background image, soccer ball and player/character for this scene
-local bkg_image
+-- The background image, soccer ball and player/character for this scene+local bkg_image
 local soccerBall
 local player
 
@@ -58,7 +57,7 @@ local alternateAnswerBox1AlreadyTouched = false
 local alternateAnswerBox2AlreadyTouched = false
 
 --create textboxes holding answer and alternate ansers 
-local answerbox
+local answerBox
 local alternateAnswerBox1
 local alternateAnswerBox2
 
@@ -80,8 +79,10 @@ local correctSound
 local booSound
 
 --scroll speed for the ball to Score
-local scrollXSpeed = 8
-local scrollYSpeed = -10
+local scrollXSpeedCorrect = 14.5
+local scrollYSpeedCorrect = -17
+local scrollXSpeedIncorrect = -17
+local scrollYSpeedIncorrect = -6
 
 
 -----------------------------------------------------------------------------------------
@@ -103,7 +104,7 @@ local function DisplayQuestion()
     questionText.text = randomNumber1 .. " x " .. randomNumber2 .. " = " 
 
     -- put the correct answer into the answerbox
-    answerbox.text = correctAnswer
+    answerBox.text = correctAnswer
 
     -- make it possible to click on the answers again
     answerboxAlreadyTouched = false
@@ -118,6 +119,7 @@ local function DetermineAlternateAnswers()
     -- generate incorrect answer and set it in the textbox
     alternateAnswer1 = correctAnswer + math.random(3, 5)
     alternateAnswerBox1.text = alternateAnswer1
+    
 
     -- generate incorrect answer and set it in the textbox
     alternateAnswer2 = correctAnswer - math.random(1, 2)
@@ -127,7 +129,7 @@ local function DetermineAlternateAnswers()
 -- RESET ALL X POSITIONS OF ANSWER BOXES (because the x-position is changed when it is
 -- placed into the black box)
 -----------------------------------------------------------------------------------------
-    answerbox.x = display.contentWidth * 0.9
+    answerBox.x = display.contentWidth * 0.9
     alternateAnswerBox1.x = display.contentWidth * 0.9
     alternateAnswerBox2.x = display.contentWidth * 0.9
 
@@ -145,7 +147,7 @@ local function PositionAnswers()
     -- random position 1
     if (randomPosition == 1) then
         -- set the new y-positions of each of the answers
-        answerbox.y = display.contentHeight * 0.4
+        answerBox.y = display.contentHeight * 0.4
 
         --alternateAnswerBox2
         alternateAnswerBox2.y = display.contentHeight * 0.70
@@ -157,12 +159,12 @@ local function PositionAnswers()
         --remembering their positions to return the answer in case it's wrong
         alternateAnswerBox1PreviousY = alternateAnswerBox1.y
         alternateAnswerBox2PreviousY = alternateAnswerBox2.y
-        answerboxPreviousY = answerbox.y 
+        answerboxPreviousY = answerBox.y 
 
     -- random position 2
     elseif (randomPosition == 2) then
 
-        answerbox.y = display.contentHeight * 0.55
+        answerBox.y = display.contentHeight * 0.55
         
         --alternateAnswerBox2
         alternateAnswerBox2.y = display.contentHeight * 0.4
@@ -173,11 +175,11 @@ local function PositionAnswers()
         --remembering their positions to return the answer in case it's wrong
         alternateAnswerBox1PreviousY = alternateAnswerBox1.y
         alternateAnswerBox2PreviousY = alternateAnswerBox2.y
-        answerboxPreviousY = answerbox.y 
+        answerboxPreviousY = answerBox.y 
 
     -- random position 3
      elseif (randomPosition == 3) then
-        answerbox.y = display.contentHeight * 0.70
+        answerBox.y = display.contentHeight * 0.70
 
         --alternateAnswerBox2
         alternateAnswerBox2.y = display.contentHeight * 0.55
@@ -188,7 +190,7 @@ local function PositionAnswers()
         --remembering their positions to return the answer in case it's wrong
         alternateAnswerBox1PreviousY = alternateAnswerBox1.y
         alternateAnswerBox2PreviousY = alternateAnswerBox2.y
-        answerboxPreviousY = answerbox.y 
+        answerboxPreviousY = answerBox.y 
     end
 end
 
@@ -203,12 +205,21 @@ local function HideIncorrectText()
 end
 
 --function to move the soccer ball once they get the answer right
-local function MoveSoccerBall()
+local function MoveSoccerBallCorrect()
     if (soccerBall.y < 100) then
-        Runtime:removeEventListener("enterFrame", MoveSoccerBall)
+        Runtime:removeEventListener("enterFrame", MoveSoccerBallCorrect)
     else
-        soccerBall.x = soccerBall.x + scrollXSpeed
-        soccerBall.y = soccerBall.y + scrollYSpeed
+        soccerBall.x = soccerBall.x + scrollXSpeedCorrect
+        soccerBall.y = soccerBall.y + scrollYSpeedCorrect
+    end
+end
+
+local function MoveSoccerBallIncorrect()
+    if (soccerBall.y < 0) then
+        Runtime:removeEventListener("enterFrame", MoveSoccerBallIncorrect)
+    else
+        soccerBall.x = soccerBall.x + scrollXSpeedCorrect
+        soccerBall.y = soccerBall.y + scrollYSpeedCorrect
     end
 end
 
@@ -231,7 +242,7 @@ local function CheckUserAnswerInput()
         correctText.isVisible = true
         timer.performWithDelay(1600, HideCorrectText)
 
-        Runtime:addEventListener("enterFrame", MoveSoccerBall) 
+        Runtime:addEventListener("enterFrame", MoveSoccerBallCorrect) 
 
         
     else 
@@ -239,6 +250,8 @@ local function CheckUserAnswerInput()
         incorrectText.isVisible = true
         incorrectText.text = "Incorrect! The correct answer is " .. correctAnswer .. "!"
         timer.performWithDelay(1600, HideIncorrectText)
+
+        Runtime:addEventListener("enterFrame", MoveSoccerBallIncorrect)
     end
 
     if (points == 5) then
@@ -262,8 +275,8 @@ local function TouchListenerAnswerbox(touch)
         --drag the answer to follow the mouse
         elseif (touch.phase == "moved") then
             
-            answerbox.x = touch.x
-            answerbox.y = touch.y
+            answerBox.x = touch.x
+            answerBox.y = touch.y
 
         -- this occurs when they release the mouse
         elseif (touch.phase == "ended") then
@@ -271,14 +284,14 @@ local function TouchListenerAnswerbox(touch)
             answerboxAlreadyTouched = false
 
               -- if the number is dragged into the userAnswerBox, place it in the center of it
-            if (((userAnswerBoxPlaceholder.x - userAnswerBoxPlaceholder.width/2) < answerbox.x ) and
-                ((userAnswerBoxPlaceholder.x + userAnswerBoxPlaceholder.width/2) > answerbox.x ) and
-                ((userAnswerBoxPlaceholder.y - userAnswerBoxPlaceholder.height/2) < answerbox.y ) and 
-                ((userAnswerBoxPlaceholder.y + userAnswerBoxPlaceholder.height/2) > answerbox.y ) ) then
+            if (((userAnswerBoxPlaceholder.x - userAnswerBoxPlaceholder.width/2) < answerBox.x ) and
+                ((userAnswerBoxPlaceholder.x + userAnswerBoxPlaceholder.width/2) > answerBox.x ) and
+                ((userAnswerBoxPlaceholder.y - userAnswerBoxPlaceholder.height/2) < answerBox.y ) and 
+                ((userAnswerBoxPlaceholder.y + userAnswerBoxPlaceholder.height/2) > answerBox.y ) ) then
 
                 -- setting the position of the number to be in the center of the box
-                answerbox.x = userAnswerBoxPlaceholder.x
-                answerbox.y = userAnswerBoxPlaceholder.y
+                answerBox.x = userAnswerBoxPlaceholder.x
+                answerBox.y = userAnswerBoxPlaceholder.y
                 userAnswer = correctAnswer
 
                 -- call the function to check if the user's input is correct or not
@@ -286,8 +299,8 @@ local function TouchListenerAnswerbox(touch)
 
             --else make box go back to where it was
             else
-                answerbox.x = answerboxPreviousX
-                answerbox.y = answerboxPreviousY
+                answerBox.x = answerboxPreviousX
+                answerBox.y = answerboxPreviousY
             end
         end
     end                
@@ -374,14 +387,14 @@ end
 
 -- Function that Adds Listeners to each answer box
 local function AddAnswerBoxEventListeners()
-    answerbox:addEventListener("touch", TouchListenerAnswerbox)
+    answerBox:addEventListener("touch", TouchListenerAnswerbox)
     alternateAnswerBox1:addEventListener("touch", TouchListenerAnswerBox1)
     alternateAnswerBox2:addEventListener("touch", TouchListenerAnswerBox2)
 end 
 
 -- Function that Removes Listeners to each answer box
 local function RemoveAnswerBoxEventListeners()
-    answerbox:removeEventListener("touch", TouchListenerAnswerbox)
+    answerBox:removeEventListener("touch", TouchListenerAnswerbox)
     alternateAnswerBox1:removeEventListener("touch", TouchListenerAnswerBox1)
     alternateAnswerBox2:removeEventListener("touch", TouchListenerAnswerBox2)
 end 
@@ -417,6 +430,7 @@ function scene:create( event )
     questionText = display.newText( "" , 0, 0, nil, 100)
     questionText.x = display.contentWidth * 0.3
     questionText.y = display.contentHeight * 0.9
+    questionText:setTextColor(1/255, 1/255, 1/255)
 
     -- create the soccer ball and place it on the scene
     soccerBall = display.newImageRect("Images/soccerball.png", 60, 60, 0, 0)
@@ -434,9 +448,12 @@ function scene:create( event )
     alternateAnswerBox2AlreadyTouched = false
 
     --create answerbox alternate answers and the boxes to show them
-    answerbox = display.newText("", display.contentWidth * 0.9, 0, nil, 100)
+    answerBox = display.newText("", display.contentWidth * 0.9, 0, nil, 100)
+    answerBox:setTextColor(1/255, 1/255, 1/255)
     alternateAnswerBox1 = display.newText("", display.contentWidth * 0.9, 0, nil, 100)
+    alternateAnswerBox1:setTextColor(1/255, 1/255, 1/255)
     alternateAnswerBox2 = display.newText("", display.contentWidth * 0.9, 0, nil, 100)
+    alternateAnswerBox2:setTextColor(1/255, 1/255, 1/255)
 
     -- set the x positions of each of the answer boxes
     answerboxPreviousX = display.contentWidth * 0.9
@@ -475,12 +492,13 @@ function scene:create( event )
     sceneGroup:insert( bkg_image ) 
     sceneGroup:insert( questionText ) 
     sceneGroup:insert( userAnswerBoxPlaceholder )
-    sceneGroup:insert( answerbox )
+    sceneGroup:insert( answerBox )
     sceneGroup:insert( alternateAnswerBox1 )
     sceneGroup:insert( alternateAnswerBox2 )
     sceneGroup:insert( soccerBall )
     sceneGroup:insert( player )
     sceneGroup:insert( pointsText )
+    sceneGroup:insert( correctText )
 
 end --function scene:create( event )
 
