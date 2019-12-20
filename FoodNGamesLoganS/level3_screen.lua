@@ -39,7 +39,8 @@ local player
 local questionText
 local points = 0
 local pointsText
-
+local lives = 5
+local livesText
 
 --the alternate numbers randomly generated
 local correctAnswer = 0
@@ -81,8 +82,8 @@ local booSound
 --scroll speed for the ball to Score
 local scrollXSpeedCorrect = 14.5
 local scrollYSpeedCorrect = -17
-local scrollXSpeedIncorrect = -17
-local scrollYSpeedIncorrect = -6
+local scrollXSpeedIncorrect = -8
+local scrollYSpeedIncorrect = -20
 
 
 -----------------------------------------------------------------------------------------
@@ -218,8 +219,8 @@ local function MoveSoccerBallIncorrect()
     if (soccerBall.y < 0) then
         Runtime:removeEventListener("enterFrame", MoveSoccerBallIncorrect)
     else
-        soccerBall.x = soccerBall.x + scrollXSpeedCorrect
-        soccerBall.y = soccerBall.y + scrollYSpeedCorrect
+        soccerBall.x = soccerBall.x + scrollXSpeedIncorrect
+        soccerBall.y = soccerBall.y + scrollYSpeedIncorrect
     end
 end
 
@@ -243,9 +244,10 @@ local function CheckUserAnswerInput()
         timer.performWithDelay(1600, HideCorrectText)
 
         Runtime:addEventListener("enterFrame", MoveSoccerBallCorrect) 
-
         
     else 
+        lives = lives -1
+        livesText.text = "Lives: " .. points
         print("correctAnswer = ".. correctAnswer)
         incorrectText.isVisible = true
         incorrectText.text = "Incorrect! The correct answer is " .. correctAnswer .. "!"
@@ -259,9 +261,13 @@ local function CheckUserAnswerInput()
     else
        timer.performWithDelay(1800, RestartLevel1)  
     end   
-    
 end
 
+local function Lives()
+    if (lives == 0) then
+        composer.gotoScene("you_lose", {effect = "fade", time = 500})
+    end
+end
 local function TouchListenerAnswerbox(touch)
     --only work if none of the other boxes have been touched
     if (alternateAnswerBox1AlreadyTouched == false) and 
@@ -471,6 +477,10 @@ function scene:create( event )
     pointsText.x = display.contentWidth/6
     pointsText.y = display.contentHeight/22
     pointsText:setTextColor(1/255, 1/255, 1/255)
+
+    livesText = display.newText("Lives: " .. lives .. "", 0, 0, nil, 40)
+    livesText.x = display.contentWidth/600
+    livesText.y = display.contentHeight/500
 
     --correct answer text
     correctText = display.newText("Correct! Great Job!", 0, 0, nil, 50)
