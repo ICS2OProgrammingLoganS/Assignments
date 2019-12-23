@@ -21,7 +21,7 @@ local widget = require( "widget" )
 -----------------------------------------------------------------------------------------
 
 -- Naming Scene
-sceneName = "main_menu"
+sceneName = "you_win"
 
 -----------------------------------------------------------------------------------------
 
@@ -33,18 +33,55 @@ local scene = composer.newScene( sceneName )
 -----------------------------------------------------------------------------------------
 
 local bkg_image
-local playButton
-local creditsButton
-local instructionsButton
+local homeButton
 
 -----------------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS
 -----------------------------------------------------------------------------------------
 
 -- Creating Transition Function to Credits Page
-local function CreditsTransition( )       
-    composer.gotoScene( "credits_screen", {effect = "crossFade", time = 500})
+local function MainMenuTransition( )       
+    composer.gotoScene( "main_menu", {effect = "crossFade", time = 500})
 end 
+
+function scene:create( event )
+
+    -- Creating a group that associates objects with the scene
+    local sceneGroup = self.view
+
+    -- Associating display objects with this scene 
+    sceneGroup:insert( homeButton )
+
+    -- Send the background image to the back layer so all other objects can be on top
+    bkg_image:toBack()
+
+    -----------------------------------------------------------------------------------------
+    -- BUTTON WIDGETS
+    -----------------------------------------------------------------------------------------   
+
+    -- Creating Play Button
+    homeButton = widget.newButton( 
+    
+        {   
+            -- Set its position on the screen relative to the screen size
+            x = display.contentWidth/2,
+            y = display.contentHeight*7/8,
+
+            width = 200,
+            height = 100,
+
+            -- Insert the images here
+            defaultFile = "Images/PlayButtonUnpressedMelody.png",
+            overFile = "Images/PlayButtonpressedMelody.png",
+
+            -- When the button is released, call the Level 1 screen transition function
+            onRelease = MainMenuTransition        
+        } )
+
+    sceneGroup:insert( homeButton )
+    bkg_image:toBack()
+
+end
 
 -----------------------------------------------------------------------------------------
 
@@ -80,9 +117,8 @@ function scene:create( event )
 
     -----------------------------------------------------------------------------------------
     -- BUTTON WIDGETS
-    -----------------------------------------------------------------------------------------   
+    ----------------------------------------------------------------------------------------- 
 
-    -- Creating home Button
 
     -----------------------------------------------------------------------------------------
 
@@ -147,6 +183,8 @@ function scene:hide( event )
     end
 
 end -- function scene:hide( event )
+
+
 
 -----------------------------------------------------------------------------------------
 

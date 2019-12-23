@@ -4,7 +4,7 @@ display.setStatusBar (display.HiddenStatusBar)
 --display the soccer field
 ---------------------------------------------------------------------------------
 --
--- FoodNGames Level 3 - soccer
+-- FoodNGames Level 5 - soccer
 -- Created by: Logan
 -- Date: Nov. 22nd, 2014
 -- Description: This is the level 3 screen of the game.
@@ -22,7 +22,7 @@ local widget = require( "widget" )
 ----------------------------------------------------------------------------------------
 
  --Naming Scene
-sceneName = "level3_screen"
+sceneName = "level5_screen"
 
  --Creating Scene Object
 local scene = composer.newScene( sceneName )
@@ -39,7 +39,7 @@ local player
 local questionText
 local points = 0
 local pointsText
-local lives = 5
+local lives = 3
 local livesText
 
 --the alternate numbers randomly generated
@@ -51,6 +51,12 @@ local incorrectText
 
 -- Variables containing the user answer and the actual answer
 local userAnswer
+
+-- creating the timer variables
+local secondsLeft = 16
+local totalSeconds = 16
+local countdownTimer
+local clockText
 
 -- boolean variables telling me which answer box wa touched
 local answerboxAlreadyTouched = false
@@ -195,6 +201,31 @@ local function PositionAnswers()
     end
 end
 
+local function UpdateTime()
+    secondsLeft = secondsLeft - 1
+
+    --display the number of seconds left in the clock object
+    clockText.text = "Time Left: " .. secondsLeft .. ""
+
+    if (secondsLeft == 0) then
+        --reset the number of seconds left
+        lives = lives - 1
+        secondsLeft = totalSeconds
+    elseif (lives == lives -1) then
+        secondsLeft = totalSeconds
+    elseif (secondsLeft == 0) then
+        lives = lives -1
+        secondsLeft = totalSeconds
+    end 
+end
+
+-- function that calls the timer
+local function StartTimer()
+    --create a countdown timer that loops infinitely
+    countdownTimer = timer.performWithDelay (1000, UpdateTime, 0)
+end
+StartTimer()
+
 --hide the correct text
 local function HideCorrectText()
     correctText.isVisible = false
@@ -242,6 +273,7 @@ local function CheckUserAnswerInput()
         pointsText.text = "Points: " .. points
         correctText.isVisible = true
         timer.performWithDelay(1600, HideCorrectText)
+        secondsLeft = totalSeconds
 
         Runtime:addEventListener("enterFrame", MoveSoccerBallCorrect) 
         
@@ -257,7 +289,8 @@ local function CheckUserAnswerInput()
     end
 
     if (points == 5) then
-        composer.gotoScene("level5_screen", {effect = "fade", time = 750})
+        composer.gotoScene("you_win", {effect = "fade", time = 500})
+        clockText.isVisible = false
     else
        timer.performWithDelay(1800, RestartLevel1)
     end   
@@ -268,7 +301,7 @@ local function Lives()
         composer.gotoScene("you_lose", {effect = "fade", time = 500})
     end
 end
-local function TouchListenerAnswerbox(touch)
+local function TouchListenerAnswerbox( touch )
     --only work if none of the other boxes have been touched
     if (alternateAnswerBox1AlreadyTouched == false) and 
         (alternateAnswerBox2AlreadyTouched == false) then
@@ -352,7 +385,7 @@ local function TouchListenerAnswerBox1(touch)
     end
 end 
 
-local function TouchListenerAnswerBox2(touch)
+local function TouchListenerAnswerBox2( touch )
     --only work if none of the other boxes have been touched
     if (answerboxAlreadyTouched == false) and 
         (alternateAnswerBox1AlreadyTouched == false) then
@@ -392,14 +425,14 @@ local function TouchListenerAnswerBox2(touch)
 end 
 
 -- Function that Adds Listeners to each answer box
-local function AddAnswerBoxEventListeners()
+local function AddAnswerBoxEventListeners( )
     answerBox:addEventListener("touch", TouchListenerAnswerbox)
     alternateAnswerBox1:addEventListener("touch", TouchListenerAnswerBox1)
     alternateAnswerBox2:addEventListener("touch", TouchListenerAnswerBox2)
 end 
 
 -- Function that Removes Listeners to each answer box
-local function RemoveAnswerBoxEventListeners()
+local function RemoveAnswerBoxEventListeners( )
     answerBox:removeEventListener("touch", TouchListenerAnswerbox)
     alternateAnswerBox1:removeEventListener("touch", TouchListenerAnswerBox1)
     alternateAnswerBox2:removeEventListener("touch", TouchListenerAnswerBox2)
@@ -497,6 +530,9 @@ function scene:create( event )
     incorrectText:setTextColor(1/255, 1/255, 1/255)
     incorrectText.isVisible = false
 
+    clockText = display.newText ("Time Left: " .. secondsLeft, display.contentWidth/7, display.contentHeight/7, nil, 50)
+    clockText:setTextColor(1/255, 1/255, 1/255)
+
     ----------------------------------------------------------------------------------
     --adding objects to the scene group
     ----------------------------------------------------------------------------------
@@ -512,6 +548,7 @@ function scene:create( event )
     sceneGroup:insert( pointsText )
     sceneGroup:insert( correctText )
     sceneGroup:insert( livesText )
+    sceneGroup:insert( clockText )
 
 end --function scene:create( event )
 
@@ -596,7 +633,5 @@ scene:addEventListener( "hide", scene )
 scene:addEventListener( "destroy", scene )
 
 -----------------------------------------------------------------------------------------
-
-Lives()
 
 return scene
